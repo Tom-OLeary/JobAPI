@@ -143,16 +143,6 @@ def write_data(to_file):
         json.dump(to_file, f)
 
 
-def get_tech_data(choice):
-    tech_list = []
-    loc = START_URL + choice + END_URL
-    print(loc)
-    data = get_data(loc)
-    tech_list += data
-    window = display_data(tech_list)
-    return window
-
-
 def get_jobs_data():
     jobs_list = []
     params = get_params()
@@ -188,7 +178,6 @@ def save_to_database():
     write_data(data_params)
 
 
-# <strong> </strong>
 def remove_characters(data):
     bad_chars = ['<', '/', '>', "strong"]
 
