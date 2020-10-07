@@ -9,12 +9,12 @@ class TestWindow(QtWidgets.QWidget):
         super().__init__()
         main_layout = QtWidgets.QHBoxLayout()
         self.list_control = QtWidgets.QListWidget()
-        self.list_control.itemClicked.connect(self.item_clicked)
         self.connection, self.cursor, self.data, self.window = [None] * 4
         main_layout.addWidget(self.list_control)
         data_display_layout = QtWidgets.QVBoxLayout()
         main_layout.addItem(data_display_layout)
         self.setLayout(main_layout)
+        self.list_control.itemClicked.connect(self.item_clicked)
 
     def display_data(self, jobs_data: list):
         for job in jobs_data:
@@ -31,18 +31,26 @@ class TestWindow(QtWidgets.QWidget):
 
 
 def get_filtered_loc(cursor: sqlite3.Cursor):
+    results = []
     location, location_ok = QtWidgets.QInputDialog.getText(None, "Choose Location",
                                                                  "Choose Location to Filter")
     sql_select = f"SELECT title FROM jobs WHERE location LIKE '%{location}%';"
-    results = cursor.execute(sql_select)
+    cursor.execute(sql_select)
+    for row in cursor.fetchall():
+        jobs_data = row[0]
+        results.append(jobs_data)
     return results
 
 
 def get_filtered_company(cursor: sqlite3.Cursor):
+    results = []
     company, company_ok = QtWidgets.QInputDialog.getText(None, "Choose Company",
                                                          "Choose Company to Filter")
     sql_select = f"SELECT title FROM jobs WHERE company LIKE '%{company}%';"
-    results = cursor.execute(sql_select)
+    cursor.execute(sql_select)
+    for row in cursor.fetchall():
+        jobs_data = row[0]
+        results.append(jobs_data)
     return results
 
 
@@ -51,13 +59,17 @@ def get_filtered_menu(cursor: sqlite3.Cursor, text):
     sql_select = f"SELECT title FROM jobs WHERE title LIKE '%{text}%';"
     cursor.execute(sql_select)
     for row in cursor.fetchall():
-        jobs_data = getJobsData.remove_characters(row[0])
+        jobs_data = row[0]
         job_titles = "".join(jobs_data)
         results.append(job_titles)
     return results
 
 
 def get_info(cursor: sqlite3.Cursor, item):
-    sql_select = f"SELECT company FROM jobs WHERE title LIKE '%{str(item.text())}%';"
-    results = cursor.execute(sql_select)
+    tmp = item.text()
+    print(tmp)
+    sql_select = f"SELECT company FROM jobs WHERE title LIKE '%{tmp}%';"
+    cursor.execute(sql_select)
+    results = cursor.fetchall()
+    print(results)
     return results

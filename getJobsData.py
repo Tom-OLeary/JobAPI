@@ -2,6 +2,7 @@ import sqlite3
 import requests
 import json
 import displayData
+import config
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QLabel
@@ -10,8 +11,8 @@ from PyQt5.QtWidgets import QListWidget
 from PyQt5 import QtWidgets
 import sys
 
-MY_API_KEY = 'f9824e1322236e2ede0a4929e3eb27c8'
-MY_API_ID = '51e101b5'
+MY_API_KEY = config.MY_API_KEY
+MY_API_ID = config.MY_API_ID
 START_URL = f"http://api.adzuna.com/v1/api/jobs/gb/search/1?app_id={MY_API_ID}&app_key={MY_API_KEY}" \
             f"&what="
 END_URL = "%20developer&content-type=application/json "
@@ -102,6 +103,7 @@ def get_data(location):
 
 def save_data(jobs: list, cursor: sqlite3.Cursor):
     for job in jobs:
+        job['title'] = remove_characters(job['title'])
         cursor.execute("INSERT INTO jobs(company, description, web_address, location, title) "
                        "VALUES (?,?,?,?,?);",
                        (job['company'].get('display_name'), job['description'], job['redirect_url'],
@@ -145,37 +147,26 @@ def write_data(to_file):
 
 def get_jobs_data():
     jobs_list = []
-    params = get_params()
+    # params = get_params()
     search_list = ['python', 'java', 'javascript', 'golang', 'devops', 'database']
     for element in search_list:
         loc = START_URL + element + END_URL
         print(loc)
         data = get_data(loc)
+        save_to_database(data)
         jobs_list += data
-    loc_params = f"https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=51e101b5&app_key" \
-                 f"=f9824e1322236e2ede0a4929e3eb27c8&salary_min={params[1]}&{params[0]} "
-    print(loc_params)
-    data_params = get_data(loc_params)
-    jobs_list += data_params
-    window = display_data(jobs_list)
-    return window
+    # loc_params = f"https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=51e101b5&app_key" \
+    #              f"=f9824e1322236e2ede0a4929e3eb27c8&salary_min={params[1]}&{params[0]} "
+    # print(loc_params)
+    # data_params = get_data(loc_params)
+    # jobs_list += data_params
+    return display_data(jobs_list)
 
 
-def save_to_database():
-    choice = get_params()
-    search_list = ['python', 'java', 'javascript', 'golang', 'devops', 'database']
-    for element in search_list:
-        loc = START_URL + element + END_URL
-        print(loc)
-        data = get_data(loc)
-        write_data(data)
-        write_database(data)
-    loc_params = f"https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=51e101b5&app_key" \
-                 f"=f9824e1322236e2ede0a4929e3eb27c8&salary_min={choice[1]}&{choice[0]} "
-    print(loc_params)
-    data_params = get_data(loc_params)
-    write_database(data_params)
-    write_data(data_params)
+def save_to_database(data):
+    print("Saving to Database...")
+    write_data(data)
+    write_database(data)
 
 
 def remove_characters(data):
@@ -187,14 +178,10 @@ def remove_characters(data):
 
 
 def main():
-    usr_input = input("Enter 1 to Save to Database, 2 to see GUI")
-    if usr_input == '1':
-        save_to_database()
-    else:
-        app = QApplication(sys.argv)
-        window = get_jobs_data()
-        window.show()
-        sys.exit(app.exec_())
+    app = QApplication(sys.argv)
+    window = get_jobs_data()
+    window.show()
+    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
