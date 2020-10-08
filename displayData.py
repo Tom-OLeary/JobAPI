@@ -6,42 +6,49 @@ import sqlite3
 class TestWindow(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        main_layout = QtWidgets.QHBoxLayout()
+        self.main_layout = QtWidgets.QHBoxLayout()
         title_label = QtWidgets.QLabel("Job Title:")
-        main_layout.addWidget(title_label)
+        self.main_layout.addWidget(title_label)
         self.list_control = QtWidgets.QListWidget()
         self.connection, self.cursor, self.data, self.window = [None] * 4
-        main_layout.addWidget(self.list_control)
-        location_label = QtWidgets.QLabel("Location:")
-        main_layout.addWidget(location_label)
-        self.location_display = QtWidgets.QListWidget()
-        main_layout.addWidget(self.location_display)
+        self.main_layout.addWidget(self.list_control)
         data_display_layout = QtWidgets.QVBoxLayout()
-        main_layout.addItem(data_display_layout)
-        self.setLayout(main_layout)
+        self.main_layout.addItem(data_display_layout)
+        self.setLayout(self.main_layout)
         self.list_control.itemClicked.connect(self.item_clicked)
 
-    def display_data(self, jobs_data: list, location_data: list):
-        for job, location in zip(jobs_data, location_data):
+    def display_data(self, jobs_data: list, filter_data: list, category_type):
+        self.category_label = QtWidgets.QLabel(category_type)
+        self.main_layout.addWidget(self.category_label)
+        self.category_display = QtWidgets.QListWidget()
+        self.main_layout.addWidget(self.category_display)
+        for job, category in zip(jobs_data, filter_data):
             self.current_item = QtWidgets.QListWidgetItem(job, self.list_control)
-            self.location_item = QtWidgets.QListWidgetItem(location, self.location_display)
+            self.category_item = QtWidgets.QListWidgetItem(category, self.category_display)
             self.current_item.setData(Qt.UserRole, job)
-            self.location_item.setData(Qt.UserRole, location)
+            self.category_item.setData(Qt.UserRole, category)
 
     def item_clicked(self, item):
         self.connection = sqlite3.connect("jobs.db")
         self.cursor = self.connection.cursor()
-        self.data = get_info(self.cursor, item)
+        self.data, self.category = get_info(self.cursor, item, "company", "jobs", "title", "web_address", "title")
         self.window = TestWindow()
-        self.window.display_data(self.data)
+        self.window.display_data(self.data, self.category, "Web Address")
         self.window.show()
 
 
-def get_filtered_loc(cursor: sqlite3.Cursor):
+def get_filtered_data(cursor: sqlite3.Cursor, category_type, selection, table, filters,
+                      selection_two, filters_two):
+    category, category_ok = QtWidgets.QInputDialog.getText(None, "Choose " + category_type,
+                                                           "Choose " + category_type + " to Filter")
+    results = collect_filtered_data(cursor, selection, table, filters, category)
+    category_list = collect_filtered_data(cursor, selection_two, table, filters_two, category)
+    return results, category_list
+
+
+def collect_filtered_data(cursor: sqlite3.Cursor, selection, table, filters, category):
     results = []
-    location, location_ok = QtWidgets.QInputDialog.getText(None, "Choose Location",
-                                                                 "Choose Location to Filter")
-    sql_select = f"SELECT title FROM jobs WHERE location LIKE '%{location}%';"
+    sql_select = f"SELECT {selection} FROM {table} WHERE {filters} LIKE '%{category}%';"
     cursor.execute(sql_select)
     for row in cursor.fetchall():
         jobs_data = row[0]
@@ -49,48 +56,14 @@ def get_filtered_loc(cursor: sqlite3.Cursor):
     return results
 
 
-def get_filtered_company(cursor: sqlite3.Cursor):
-    results = []
-    company, company_ok = QtWidgets.QInputDialog.getText(None, "Choose Company",
-                                                         "Choose Company to Filter")
-    sql_select = f"SELECT title FROM jobs WHERE company LIKE '%{company}%';"
-    cursor.execute(sql_select)
-    for row in cursor.fetchall():
-        jobs_data = row[0]
-        results.append(jobs_data)
-    return results
+def get_filtered_menu(cursor: sqlite3.Cursor, text, selection, table, filters, selection_two, filters_two):
+    results = collect_filtered_data(cursor, selection, table, filters, text)
+    category_list = collect_filtered_data(cursor, selection_two, table, filters_two, text)
+    return results, category_list
 
 
-def get_filtered_menu(cursor: sqlite3.Cursor, text):
-    results = []
-    location_data = []
-    sql_select = f"SELECT title FROM jobs WHERE title LIKE '%{text}%';"
-    cursor.execute(sql_select)
-    for row in cursor.fetchall():
-        jobs_data = row[0]
-        job_titles = "".join(jobs_data)
-        results.append(job_titles)
-    sql_select_location = f"SELECT location FROM jobs WHERE title LIKE '%{text}%';"
-    cursor.execute(sql_select_location)
-    for row in cursor.fetchall():
-        jobs_data = row[0]
-        job_titles = "".join(jobs_data)
-        location_data.append(job_titles)
-    return results, location_data
-
-
-def get_info(cursor: sqlite3.Cursor, item):
-    results = []
+def get_info(cursor: sqlite3.Cursor, item, selection, table, filters, selection_two, filters_two):
     tmp = item.text()
-    sql_select = f"SELECT company FROM jobs WHERE title LIKE '%{tmp}%';"
-    cursor.execute(sql_select)
-    for row in cursor.fetchall():
-        jobs_data = row[0]
-        results.append(jobs_data)
-    print(results)
-    return results
-
-
-# def get_id(cursor: sqlite3.Cursor, item):
-#     tmp = item.text()
-#     sql_id_select = f"SELECT id FROM jobs WHERE title"
+    results = collect_filtered_data(cursor, selection, table, filters, tmp)
+    category_list = collect_filtered_data(cursor, selection_two, table, filters_two, tmp)
+    return results, category_list
