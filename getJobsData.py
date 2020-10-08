@@ -3,7 +3,7 @@ Thomas O'Leary
 JobAPI - Retrieve Data from Adzuna API
 https://developer.adzuna.com/
 
-Python 3.7
+Python 3.8
 
 """
 # getJobsData.py
