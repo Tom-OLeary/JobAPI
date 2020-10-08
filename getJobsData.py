@@ -57,12 +57,14 @@ class JobsWindow(QListWidget):
         self.company_filter.pressed.connect(self.initiate_filter)
         self.tech_box.currentIndexChanged[str].connect(self.tech_choice)
 
+    # Show Next Job Push Button
     def show_next_job(self):
         self.data_item_displayed += 1
         self.current_data = self.data_to_display[self.data_item_displayed]
         self.title_display.addItem(remove_characters(self.current_data['title']))
         self.com_display.addItem(self.current_data['company'].get('display_name'))
 
+    # Handles Technology Drop-Down Menu
     def tech_choice(self, text):
         self.filter = displayData
         self.connection = sqlite3.connect("jobs.db")
@@ -73,6 +75,7 @@ class JobsWindow(QListWidget):
         self.window.display_data(self.jobs, self.location, "Location:")
         self.window.show()
 
+    # Determines Which Filter Push Button was Pressed
     def initiate_filter(self):
         if self.company_filter.isChecked():
             self.filter_items("Company:", "title", "jobs",
@@ -83,6 +86,7 @@ class JobsWindow(QListWidget):
                               "location", "web_address", "location", "Web Address:")
             self.loc_filter.setChecked(False)
 
+    # Filters and Displays New Data
     def filter_items(self, name: str, selection: str, table: str, filter_in: str, selection_two: str,
                      filter_two_in: str, category_type: str):
         self.filter = displayData
@@ -95,11 +99,13 @@ class JobsWindow(QListWidget):
         self.window.show()
 
 
+# Displays Initial Window Data (JobsWindow)
 def display_data(to_display):
     window = JobsWindow(to_display)
     return window
 
 
+# Connects to Adzuna API
 def get_data(location):
     response = requests.get(location)
     if response.status_code != 200:
@@ -108,6 +114,7 @@ def get_data(location):
     return data['results']
 
 
+# Cleans Up Data Format and Saves Results to Jobs Database
 def save_data(jobs: list, cursor: sqlite3.Cursor):
     for job in jobs:
         job['title'] = remove_characters(job['title'])
@@ -118,6 +125,7 @@ def save_data(jobs: list, cursor: sqlite3.Cursor):
                         job['location'].get('display_name'), job['title']))
 
 
+# Create Jobs Table
 def setup_database(cursor: sqlite3.Cursor):
     create_statement = """CREATE TABLE IF NOT EXISTS jobs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -138,21 +146,13 @@ def write_database(data):
     connection.close()
 
 
-def get_params():
-    job_type = input("Full Time or Part Time?: Capital F/P ")
-    if job_type == 'F':
-        job_type = 'full_time=1'
-    else:
-        job_type = 'part_time=1'
-    salary_min = input("Please Enter Minimum Salary: ")
-    return job_type, salary_min
-
-
+# Save Data to Text File
 def write_data(to_file):
     with open('data.txt', 'w') as f:
         json.dump(to_file, f)
 
 
+# Retrieves JSON Data from Website
 def get_jobs_data():
     jobs_list = []
     search_list = ['python', 'java', 'javascript', 'golang', 'devops', 'database']
@@ -171,6 +171,7 @@ def save_to_database(data):
     write_database(data)
 
 
+# Removes Unwanted Characters from Data
 def remove_characters(data):
     bad_chars = ['<', '/', '>', "strong"]
 

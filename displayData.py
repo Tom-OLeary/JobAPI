@@ -17,6 +17,7 @@ class TestWindow(QtWidgets.QWidget):
         self.setLayout(self.main_layout)
         self.list_control.itemClicked.connect(self.item_clicked)
 
+    # Displays Filtered Data to New Window
     def display_data(self, jobs_data: list, filter_data: list, category_type):
         self.category_label = QtWidgets.QLabel(category_type)
         self.main_layout.addWidget(self.category_label)
@@ -37,6 +38,7 @@ class TestWindow(QtWidgets.QWidget):
         self.window.show()
 
 
+# Handles Data from Location and Company Push Buttons
 def get_filtered_data(cursor: sqlite3.Cursor, category_type, selection, table, filters,
                       selection_two, filters_two):
     category, category_ok = QtWidgets.QInputDialog.getText(None, "Choose " + category_type,
@@ -46,6 +48,7 @@ def get_filtered_data(cursor: sqlite3.Cursor, category_type, selection, table, f
     return results, category_list
 
 
+# Retrieves Specific Data from the Jobs Database
 def collect_filtered_data(cursor: sqlite3.Cursor, selection, table, filters, category):
     results = []
     sql_select = f"SELECT {selection} FROM {table} WHERE {filters} LIKE '%{category}%';"
@@ -56,12 +59,14 @@ def collect_filtered_data(cursor: sqlite3.Cursor, selection, table, filters, cat
     return results
 
 
+# Handles Selection from Technology Drop-Down Menu
 def get_filtered_menu(cursor: sqlite3.Cursor, text, selection, table, filters, selection_two, filters_two):
     results = collect_filtered_data(cursor, selection, table, filters, text)
     category_list = collect_filtered_data(cursor, selection_two, table, filters_two, text)
     return results, category_list
 
 
+# Collects Data Pertaining to a Clicked Title Name
 def get_info(cursor: sqlite3.Cursor, item, selection, table, filters, selection_two, filters_two):
     tmp = item.text()
     results = collect_filtered_data(cursor, selection, table, filters, tmp)

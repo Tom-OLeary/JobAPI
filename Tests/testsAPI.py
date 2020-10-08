@@ -1,7 +1,6 @@
 import os.path
 import sqlite3
 import getJobsData
-import pytest
 
 
 def test_get_data():
