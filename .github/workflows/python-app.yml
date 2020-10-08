@@ -8,9 +8,12 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  
 
 jobs:
+     
   build:
+    continue-on-error: true
 
     runs-on: ubuntu-latest
 
