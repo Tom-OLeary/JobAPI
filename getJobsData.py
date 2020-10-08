@@ -1,3 +1,13 @@
+"""
+Thomas O'Leary
+JobAPI - Retrieve Data from Adzuna API
+https://developer.adzuna.com/
+
+Python 3.7
+
+"""
+# getJobsData.py
+
 import sqlite3
 import requests
 import json
@@ -160,7 +170,7 @@ def get_jobs_data():
         loc = START_URL + element + END_URL
         print(loc)
         data = get_data(loc)
-        # save_to_database(data)
+        save_to_database(data)
         jobs_list += data
     return display_data(jobs_list)
 
