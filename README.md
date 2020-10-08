@@ -5,7 +5,7 @@ This project collects jobs data from the Adzuna API and displays the data with a
 * Each filter displays a new window along with additional data such as web address, description, location, etc.
 
 # Requirements:
-* sqlite3, PyQT5
+* sqlite3, PyQT5, Python 3.7
 
 # Files:
     > getJobsData - Main file, collects data and displays to initial GUI window
