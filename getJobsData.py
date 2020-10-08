@@ -18,12 +18,20 @@ START_URL = f"http://api.adzuna.com/v1/api/jobs/gb/search/1?app_id={MY_API_ID}&a
 END_URL = "%20developer&content-type=application/json "
 
 
+# loc_params = f"https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=51e101b5&app_key" \
+#              f"=f9824e1322236e2ede0a4929e3eb27c8&salary_min={params[1]}&{params[0]} "
+# print(loc_params)
+# data_params = get_data(loc_params)
+# jobs_list += data_params
+
+
 class JobsWindow(QListWidget):
     def __init__(self, to_display):
         super().__init__()
         self.data_to_display = to_display
         self.data_item_displayed = 0
         self.filter, self.connection, self.cursor, self.jobs, self.window = [None] * 5
+        self.location = None
         self.current_data = self.data_to_display[self.data_item_displayed]
         main_layout = QtWidgets.QVBoxLayout()
         top_label = QLabel("Job Title:")
@@ -64,9 +72,9 @@ class JobsWindow(QListWidget):
         self.filter = displayData
         self.connection = sqlite3.connect("jobs.db")
         self.cursor = self.connection.cursor()
-        self.jobs = self.filter.get_filtered_menu(self.cursor, text)
+        self.jobs, self.location = self.filter.get_filtered_menu(self.cursor, text)
         self.window = displayData.TestWindow()
-        self.window.display_data(self.jobs)
+        self.window.display_data(self.jobs, self.location)
         self.window.show()
 
     def filter_loc(self):
@@ -147,19 +155,13 @@ def write_data(to_file):
 
 def get_jobs_data():
     jobs_list = []
-    # params = get_params()
     search_list = ['python', 'java', 'javascript', 'golang', 'devops', 'database']
     for element in search_list:
         loc = START_URL + element + END_URL
         print(loc)
         data = get_data(loc)
-        save_to_database(data)
+        # save_to_database(data)
         jobs_list += data
-    # loc_params = f"https://api.adzuna.com/v1/api/jobs/gb/search/1?app_id=51e101b5&app_key" \
-    #              f"=f9824e1322236e2ede0a4929e3eb27c8&salary_min={params[1]}&{params[0]} "
-    # print(loc_params)
-    # data_params = get_data(loc_params)
-    # jobs_list += data_params
     return display_data(jobs_list)
 
 
