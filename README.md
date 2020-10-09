@@ -12,6 +12,7 @@ This project collects jobs data from the Adzuna API and displays the data with a
     > displayData - Provides pop up windows for displaying filtered data
 
 # Potential Improvements:
+* Fix CI "module not found" error for .gitignore files
 * Create a separate function to create/save the database so that it is not repopulated with the same data
 * Create a separate function which allows the user to populate new tables with specific parameters 
 * Write more tests
