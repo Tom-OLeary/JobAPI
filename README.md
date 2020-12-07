@@ -1,5 +1,5 @@
-## Thomas O'Leary
-# JobAPI
+
+# JobsData
 This project collects jobs data from the Adzuna API and displays the data with a simple GUI.
 * Data can be filtered by programming language, job location or company name
 * Each filter displays a new window along with additional data such as web address, description, location, etc.
